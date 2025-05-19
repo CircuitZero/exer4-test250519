@@ -4,9 +4,27 @@ permissions:
   actions: write
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
   
 jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: production
+      url: http://gigantic-adjustment.surge.sh
+    steps:
+      - name: download build artifact
+        uses: actions/download-artifact@v4.3.0
+        with:
+          name: build
+      - name: deploy to surge
+        run: npx surge --project '.' --domain gigantic-adjustment.surge.sh
+        env:
+          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
   build:
     runs-on: ubuntu-latest
     steps:
